@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { X, Upload, RotateCcw, Check, Sparkles, Image as ImageIcon } from "lucide-react";
 import { PhotoData } from "./PhotoCollage";
+import { compressImageFile } from "../utils/imageHelper";
 
 interface CustomizerModalProps {
   isOpen: boolean;
@@ -29,16 +30,13 @@ export const CustomizerModal: React.FC<CustomizerModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleFileUpload = (id: number, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (id: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          onUpdatePhoto(id, event.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
+      const compressed = await compressImageFile(file);
+      if (compressed) {
+        onUpdatePhoto(id, compressed);
+      }
     }
   };
 

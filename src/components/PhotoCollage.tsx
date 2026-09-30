@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Camera, Upload, X, ZoomIn, Sparkles } from "lucide-react";
 import { WashiTape, CuteTulip } from "./Motifs";
 import { sounds } from "../utils/audio";
+import { compressImageFile } from "../utils/imageHelper";
 import {
   pageContainerVariants,
   fadeUpVariant,
@@ -34,18 +35,24 @@ export const PhotoCollage: React.FC<PhotoCollageProps> = ({
 }) => {
   const [selectedPhoto, setSelectedPhoto] = useState<PhotoData | null>(null);
   const [editingPhotoId, setEditingPhotoId] = useState<number | null>(null);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
 
-  const handleFileUpload = (id: number, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (id: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          onUpdatePhoto(id, event.target.result as string);
+      setIsUploading(true);
+      try {
+        const compressedUrl = await compressImageFile(file);
+        if (compressedUrl) {
+          onUpdatePhoto(id, compressedUrl);
           setEditingPhotoId(null);
+          setSelectedPhoto((prev) => (prev && prev.id === id ? { ...prev, url: compressedUrl } : prev));
         }
-      };
-      reader.readAsDataURL(file);
+      } catch (err) {
+        console.error("Error processing photo:", err);
+      } finally {
+        setIsUploading(false);
+      }
     }
   };
 
@@ -111,6 +118,18 @@ export const PhotoCollage: React.FC<PhotoCollageProps> = ({
                   alt={`Memory ${item.id}`}
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const fallbackUrls: Record<number, string> = {
+                      1: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=700&q=80",
+                      2: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=700&q=80",
+                      3: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=700&q=80",
+                      4: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=700&q=80",
+                    };
+                    const fallback = fallbackUrls[item.id];
+                    if (fallback && e.currentTarget.src !== fallback) {
+                      e.currentTarget.src = fallback;
+                    }
+                  }}
                 />
               ) : (
                 /* Styled fallback Polaroid slot */
@@ -218,28 +237,19 @@ export const PhotoCollage: React.FC<PhotoCollageProps> = ({
               <div className="border-t border-stone-100 pt-3 flex items-center gap-2">
                 <label className="flex-1 h-10 px-3 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-medium rounded-lg flex items-center justify-center gap-1.5 cursor-pointer transition-colors">
                   <Upload size={14} />
-                  <span>{selectedPhoto.url ? "Replace Photo" : "Upload Her Photo"}</span>
+                  <span>
+                    {isUploading
+                      ? "Uploading..."
+                      : selectedPhoto.url
+                      ? "Replace Photo"
+                      : "Upload Her Photo"}
+                  </span>
                   <input
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={(e) => {
-                      handleFileUpload(selectedPhoto.id, e);
-                      // Update the modal view with reader result
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (ev) => {
-                          if (ev.target?.result) {
-                            setSelectedPhoto({
-                              ...selectedPhoto,
-                              url: ev.target.result as string,
-                            });
-                          }
-                        };
-                        reader.readAsDataURL(file);
-                      }
-                    }}
+                    disabled={isUploading}
+                    onChange={(e) => handleFileUpload(selectedPhoto.id, e)}
                   />
                 </label>
                 <button

@@ -27,6 +27,37 @@ import { ChudailScannerModal } from "./components/ChudailScannerModal";
 import { CuteAlien, CuteTulip } from "./components/Motifs";
 import { FloatingBackgroundMotifs } from "./components/FloatingMotifs";
 
+export const DEFAULT_PHOTOS: PhotoData[] = [
+  {
+    id: 1,
+    caption: "Baalon mein phool laga ke innocent banne ki full koshish! 🤘",
+    url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=700&q=80",
+    rotation: -2.5,
+    tapeColor: "pink",
+  },
+  {
+    id: 2,
+    caption: "Okay okay, ye wali actually achi hai... zyada hawa mein mat udna. 🙄🌷",
+    url: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=700&q=80",
+    rotation: 2,
+    tapeColor: "green",
+  },
+  {
+    id: 3,
+    caption: "Yellow saree mein madam ka iconic look — 100% drama! 💛",
+    url: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=700&q=80",
+    rotation: -1.5,
+    tapeColor: "cream",
+  },
+  {
+    id: 4,
+    caption: "Hair adjust karne ka candid drama... Certified Cutiee piee! 🫠🙃",
+    url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=700&q=80",
+    rotation: 3,
+    tapeColor: "pink",
+  },
+];
+
 export default function App() {
   const [currentPage, setCurrentPage] = useState<number>(() => {
     try {
@@ -71,66 +102,53 @@ export default function App() {
 
   // 4 Photos initialized from localStorage or defaults
   const [photos, setPhotos] = useState<PhotoData[]>(() => {
-    const saved = localStorage.getItem("bestie_photos");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        // Fallback to default
+    try {
+      const saved = localStorage.getItem("bestie_photos");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length === 4) {
+          return DEFAULT_PHOTOS.map((def, idx) => ({
+            ...def,
+            ...parsed[idx],
+            url: parsed[idx]?.url || def.url,
+          }));
+        }
       }
+    } catch {
+      // Fallback to default
     }
-    return [
-      {
-        id: 1,
-        caption: "Baalon mein phool laga ke innocent banne ki full koshish! 🤘",
-        url: "",
-        rotation: -2.5,
-        tapeColor: "pink",
-      },
-      {
-        id: 2,
-        caption: "Okay okay, ye wali actually achi hai... zyada hawa mein mat udna. 🙄🌷",
-        url: "",
-        rotation: 2,
-        tapeColor: "green",
-      },
-      {
-        id: 3,
-        caption: "Yellow saree mein madam ka iconic look — 100% drama! 💛",
-        url: "",
-        rotation: -1.5,
-        tapeColor: "cream",
-      },
-      {
-        id: 4,
-        caption: "Hair adjust karne ka candid drama... Certified Cutiee piee! 🫠🙃",
-        url: "",
-        rotation: 3,
-        tapeColor: "pink",
-      },
-    ];
+    return DEFAULT_PHOTOS;
   });
 
   // Save changes to localStorage
   const updateHerName = (name: string) => {
     setHerName(name);
-    localStorage.setItem("bestie_name", name);
+    try {
+      localStorage.setItem("bestie_name", name);
+    } catch {
+      // ignore
+    }
   };
 
   const updatePhoto = (id: number, url: string) => {
     setPhotos((prev) => {
       const updated = prev.map((p) => (p.id === id ? { ...p, url } : p));
-      localStorage.setItem("bestie_photos", JSON.stringify(updated));
+      try {
+        localStorage.setItem("bestie_photos", JSON.stringify(updated));
+      } catch (err) {
+        console.warn("Storage quota warning:", err);
+      }
       return updated;
     });
   };
 
   const resetPhotos = () => {
-    setPhotos((prev) => {
-      const reset = prev.map((p) => ({ ...p, url: "" }));
+    setPhotos(DEFAULT_PHOTOS);
+    try {
       localStorage.removeItem("bestie_photos");
-      return reset;
-    });
+    } catch {
+      // ignore
+    }
   };
 
   const handleNextPage = () => {
