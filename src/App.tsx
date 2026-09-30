@@ -27,7 +27,7 @@ import { ChudailScannerModal } from "./components/ChudailScannerModal";
 import { CuteAlien, CuteTulip } from "./components/Motifs";
 import { FloatingBackgroundMotifs } from "./components/FloatingMotifs";
 
-const defaultPhotos: PhotoData[] = [
+export const DEFAULT_PHOTOS: PhotoData[] = [
   {
     id: 1,
     caption: "Baalon mein phool laga ke innocent banne ki full koshish! 🤘",
@@ -106,7 +106,7 @@ export default function App() {
       if (saved) {
         const savedPhotos: unknown = JSON.parse(saved);
         if (Array.isArray(savedPhotos)) {
-          return defaultPhotos.map((photo) => {
+          return DEFAULT_PHOTOS.map((photo) => {
             const savedPhoto = savedPhotos.find(
               (item) => item?.id === photo.id && typeof item.url === "string" && item.url.trim(),
             );
@@ -115,28 +115,39 @@ export default function App() {
         }
       }
     } catch {
-      return defaultPhotos;
+      return DEFAULT_PHOTOS;
     }
-    return defaultPhotos;
+    return DEFAULT_PHOTOS;
   });
 
   // Save changes to localStorage
   const updateHerName = (name: string) => {
     setHerName(name);
-    localStorage.setItem("bestie_name", name);
+    try {
+      localStorage.setItem("bestie_name", name);
+    } catch {
+      // ignore
+    }
   };
 
   const updatePhoto = (id: number, url: string) => {
     setPhotos((prev) => {
       const updated = prev.map((p) => (p.id === id ? { ...p, url } : p));
-      localStorage.setItem("bestie_photos", JSON.stringify(updated));
+      try {
+        localStorage.setItem("bestie_photos", JSON.stringify(updated));
+      } catch (err) {
+        console.warn("Storage quota warning:", err);
+      }
       return updated;
     });
   };
 
   const resetPhotos = () => {
-    localStorage.removeItem("bestie_photos");
-    setPhotos(defaultPhotos);
+    setPhotos(DEFAULT_PHOTOS);
+    try {
+      localStorage.removeItem("bestie_photos");
+    } catch {
+    }
   };
 
   const handleNextPage = () => {
