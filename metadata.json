@@ -1,0 +1,8 @@
+{
+  "name": "Alien & Tulip: Birthday Transmission",
+  "description": "A personal, playful, and heartwarming interactive birthday story for my best friend.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

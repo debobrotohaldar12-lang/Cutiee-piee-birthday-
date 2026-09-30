@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #1E1B18;
+    background-color: #F8F6F0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    touch-action: manipulation;
+  }
+}
+
+.font-serif-display {
+  font-family: 'Fraunces', Georgia, serif;
+}
+
+.font-handwriting {
+  font-family: 'Caveat', cursive;
+}
+
+.font-body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Subtle paper texture feel */
+.paper-pattern {
+  background-color: #FBF9F5;
+  background-image: radial-gradient(rgba(120, 113, 108, 0.07) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* Washi tape visual motif */
+.washi-tape-pink {
+  background: rgba(244, 114, 182, 0.28);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.washi-tape-green {
+  background: rgba(110, 189, 140, 0.32);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #E7E5E4;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #D6D3D1;
+}
