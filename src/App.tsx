@@ -31,28 +31,28 @@ export const DEFAULT_PHOTOS: PhotoData[] = [
   {
     id: 1,
     caption: "Baalon mein phool laga ke innocent banne ki full koshish! 🤘",
-    url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=700&q=80",
+    url: "/photos/flower-portrait.jpg",
     rotation: -2.5,
     tapeColor: "pink",
   },
   {
     id: 2,
     caption: "Okay okay, ye wali actually achi hai... zyada hawa mein mat udna. 🙄🌷",
-    url: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=700&q=80",
+    url: "/photos/portrait.jpg",
     rotation: 2,
     tapeColor: "green",
   },
   {
     id: 3,
     caption: "Yellow saree mein madam ka iconic look — 100% drama! 💛",
-    url: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=700&q=80",
+    url: "/photos/yellow-saree.jpg",
     rotation: -1.5,
     tapeColor: "cream",
   },
   {
     id: 4,
     caption: "Hair adjust karne ka candid drama... Certified Cutiee piee! 🫠🙃",
-    url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=700&q=80",
+    url: "/photos/candid.jpg",
     rotation: 3,
     tapeColor: "pink",
   },
@@ -100,22 +100,22 @@ export default function App() {
     }
   }, [currentPage]);
 
-  // 4 Photos initialized from localStorage or defaults
   const [photos, setPhotos] = useState<PhotoData[]>(() => {
     try {
       const saved = localStorage.getItem("bestie_photos");
       if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length === 4) {
-          return DEFAULT_PHOTOS.map((def, idx) => ({
-            ...def,
-            ...parsed[idx],
-            url: parsed[idx]?.url || def.url,
-          }));
+        const savedPhotos: unknown = JSON.parse(saved);
+        if (Array.isArray(savedPhotos)) {
+          return DEFAULT_PHOTOS.map((photo) => {
+            const savedPhoto = savedPhotos.find(
+              (item) => item?.id === photo.id && typeof item.url === "string" && item.url.trim(),
+            );
+            return savedPhoto ? { ...photo, url: savedPhoto.url } : photo;
+          });
         }
       }
     } catch {
-      // Fallback to default
+      return DEFAULT_PHOTOS;
     }
     return DEFAULT_PHOTOS;
   });
@@ -147,7 +147,6 @@ export default function App() {
     try {
       localStorage.removeItem("bestie_photos");
     } catch {
-      // ignore
     }
   };
 
