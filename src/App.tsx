@@ -27,6 +27,37 @@ import { ChudailScannerModal } from "./components/ChudailScannerModal";
 import { CuteAlien, CuteTulip } from "./components/Motifs";
 import { FloatingBackgroundMotifs } from "./components/FloatingMotifs";
 
+const defaultPhotos: PhotoData[] = [
+  {
+    id: 1,
+    caption: "Baalon mein phool laga ke innocent banne ki full koshish! 🤘",
+    url: "/photos/flower-portrait.jpg",
+    rotation: -2.5,
+    tapeColor: "pink",
+  },
+  {
+    id: 2,
+    caption: "Okay okay, ye wali actually achi hai... zyada hawa mein mat udna. 🙄🌷",
+    url: "/photos/portrait.jpg",
+    rotation: 2,
+    tapeColor: "green",
+  },
+  {
+    id: 3,
+    caption: "Yellow saree mein madam ka iconic look — 100% drama! 💛",
+    url: "/photos/yellow-saree.jpg",
+    rotation: -1.5,
+    tapeColor: "cream",
+  },
+  {
+    id: 4,
+    caption: "Hair adjust karne ka candid drama... Certified Cutiee piee! 🫠🙃",
+    url: "/photos/candid.jpg",
+    rotation: 3,
+    tapeColor: "pink",
+  },
+];
+
 export default function App() {
   const [currentPage, setCurrentPage] = useState<number>(() => {
     try {
@@ -69,46 +100,24 @@ export default function App() {
     }
   }, [currentPage]);
 
-  // 4 Photos initialized from localStorage or defaults
   const [photos, setPhotos] = useState<PhotoData[]>(() => {
-    const saved = localStorage.getItem("bestie_photos");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        // Fallback to default
+    try {
+      const saved = localStorage.getItem("bestie_photos");
+      if (saved) {
+        const savedPhotos: unknown = JSON.parse(saved);
+        if (Array.isArray(savedPhotos)) {
+          return defaultPhotos.map((photo) => {
+            const savedPhoto = savedPhotos.find(
+              (item) => item?.id === photo.id && typeof item.url === "string" && item.url.trim(),
+            );
+            return savedPhoto ? { ...photo, url: savedPhoto.url } : photo;
+          });
+        }
       }
+    } catch {
+      return defaultPhotos;
     }
-    return [
-      {
-        id: 1,
-        caption: "Baalon mein phool laga ke innocent banne ki full koshish! 🤘",
-        url: "",
-        rotation: -2.5,
-        tapeColor: "pink",
-      },
-      {
-        id: 2,
-        caption: "Okay okay, ye wali actually achi hai... zyada hawa mein mat udna. 🙄🌷",
-        url: "",
-        rotation: 2,
-        tapeColor: "green",
-      },
-      {
-        id: 3,
-        caption: "Yellow saree mein madam ka iconic look — 100% drama! 💛",
-        url: "",
-        rotation: -1.5,
-        tapeColor: "cream",
-      },
-      {
-        id: 4,
-        caption: "Hair adjust karne ka candid drama... Certified Cutiee piee! 🫠🙃",
-        url: "",
-        rotation: 3,
-        tapeColor: "pink",
-      },
-    ];
+    return defaultPhotos;
   });
 
   // Save changes to localStorage
@@ -126,11 +135,8 @@ export default function App() {
   };
 
   const resetPhotos = () => {
-    setPhotos((prev) => {
-      const reset = prev.map((p) => ({ ...p, url: "" }));
-      localStorage.removeItem("bestie_photos");
-      return reset;
-    });
+    localStorage.removeItem("bestie_photos");
+    setPhotos(defaultPhotos);
   };
 
   const handleNextPage = () => {
